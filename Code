@@ -1,0 +1,77 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Step 1: Data Preparation and Exploration
+data = pd.read_csv('/Users/mohamedkamara/Library/Containers/com.microsoft.Excel/Data/Downloads/jobs_in_data.csv')
+
+# Display basic information about the dataset
+print("First few rows of the dataset:")
+print(data.head())
+
+print("\nInformation about columns, data types, and null values:")
+print(data.info())
+
+print("\nStatistical summary of numerical columns:")
+print(data.describe())
+
+# Assuming 'job_title', 'job_category', 'experience_level', 'company_location' might be relevant
+selected_features = ['job_title', 'job_category', 'experience_level', 'company_location']
+X_selected = data[selected_features]
+
+# Perform one-hot encoding for categorical columns
+encoded_data = pd.get_dummies(X_selected, drop_first=True)
+
+# Define your target variable 'y' (salary)
+y = data['salary_in_usd']
+
+# Splitting data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(encoded_data, y, test_size=0.2, random_state=42)
+
+# Instantiate the model (Random Forest Regressor)
+model = RandomForestRegressor(n_estimators=100, random_state=42)
+
+# Train the model using the training sets
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+r2 = r2_score(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+
+print(f"R-squared: {r2}")
+print(f"Mean Squared Error: {mse}")
+
+# Visualizations for Exploratory Data Analysis (EDA)
+# Temporal Trends in Salaries
+plt.figure(figsize=(10, 6))
+sns.lineplot(x='work_year', y='salary_in_usd', data=data)
+plt.title('Temporal Trends in Salaries')
+plt.xlabel('Work Year')
+plt.ylabel('Salary (in USD)')
+plt.show()
+
+# Salary Distributions Across Job Categories
+plt.figure(figsize=(12, 6))
+sns.boxplot(x='job_category', y='salary_in_usd', data=data)
+plt.title('Salary Distributions Across Job Categories')
+plt.xlabel('Job Category')
+plt.ylabel('Salary (in USD)')
+plt.xticks(rotation=45)
+plt.show()
+
+# Additional Model Evaluation Visualizations
+# Actual vs. Predicted values plot
+plt.figure(figsize=(8, 6))
+plt.scatter(y_test, y_pred, alpha=0.5)
+plt.xlabel('Actual Salary (in USD)')
+plt.ylabel('Predicted Salary (in USD)')
+plt.title('Actual vs. Predicted Salary')
+plt.show()
+
+
